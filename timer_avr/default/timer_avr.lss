@@ -1,0 +1,158 @@
+
+timer_avr.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000000d0  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .bss          00000001  00800060  00800060  00000144  2**0
+                  ALLOC
+  2 .debug_aranges 00000020  00000000  00000000  00000144  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  3 .debug_pubnames 00000035  00000000  00000000  00000164  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .debug_info   000000a7  00000000  00000000  00000199  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_abbrev 00000077  00000000  00000000  00000240  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_line   000000f1  00000000  00000000  000002b7  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_frame  00000030  00000000  00000000  000003a8  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_str    0000009f  00000000  00000000  000003d8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+   8:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+   c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  10:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  14:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  18:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  1c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  20:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  24:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  28:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  2c:	0c 94 4c 00 	jmp	0x98	; 0x98 <__vector_11>
+  30:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  34:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  38:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  3c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  40:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  44:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  48:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  4c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  50:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d8 e0       	ldi	r29, 0x08	; 8
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+
+00000060 <__do_clear_bss>:
+  60:	10 e0       	ldi	r17, 0x00	; 0
+  62:	a0 e6       	ldi	r26, 0x60	; 96
+  64:	b0 e0       	ldi	r27, 0x00	; 0
+  66:	01 c0       	rjmp	.+2      	; 0x6a <.do_clear_bss_start>
+
+00000068 <.do_clear_bss_loop>:
+  68:	1d 92       	st	X+, r1
+
+0000006a <.do_clear_bss_start>:
+  6a:	a1 36       	cpi	r26, 0x61	; 97
+  6c:	b1 07       	cpc	r27, r17
+  6e:	e1 f7       	brne	.-8      	; 0x68 <.do_clear_bss_loop>
+  70:	0e 94 3e 00 	call	0x7c	; 0x7c <main>
+  74:	0c 94 66 00 	jmp	0xcc	; 0xcc <_exit>
+
+00000078 <__bad_interrupt>:
+  78:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000007c <main>:
+volatile uint8_t count;
+
+void main()
+{
+   // Prescaler = FCPU/1024
+   TCCR0|=(1<<CS02)|(1<<CS00);
+  7c:	83 b7       	in	r24, 0x33	; 51
+  7e:	85 60       	ori	r24, 0x05	; 5
+  80:	83 bf       	out	0x33, r24	; 51
+
+   //Enable Overflow Interrupt Enable
+   TIMSK|=(1<<TOIE0);
+  82:	89 b7       	in	r24, 0x39	; 57
+  84:	81 60       	ori	r24, 0x01	; 1
+  86:	89 bf       	out	0x39, r24	; 57
+
+   //Initialize Counter
+   TCNT0=0;
+  88:	12 be       	out	0x32, r1	; 50
+
+   //Initialize our varriable
+   count=0;
+  8a:	10 92 60 00 	sts	0x0060, r1
+
+   //Port C[3,2,1,0] as out put
+   DDRC|=0x0F;
+  8e:	84 b3       	in	r24, 0x14	; 20
+  90:	8f 60       	ori	r24, 0x0F	; 15
+  92:	84 bb       	out	0x14, r24	; 20
+
+   //Enable Global Interrupts
+   sei();
+  94:	78 94       	sei
+  96:	ff cf       	rjmp	.-2      	; 0x96 <main+0x1a>
+
+00000098 <__vector_11>:
+   //Infinite loop
+   while(1);
+}
+
+ISR(TIMER0_OVF_vect)
+{
+  98:	1f 92       	push	r1
+  9a:	0f 92       	push	r0
+  9c:	0f b6       	in	r0, 0x3f	; 63
+  9e:	0f 92       	push	r0
+  a0:	11 24       	eor	r1, r1
+  a2:	8f 93       	push	r24
+   //This is the interrupt service routine for TIMER0 OVERFLOW Interrupt.
+   //CPU automatically call this when TIMER0 overflows.
+
+   //Increment our variable
+   count++;
+  a4:	80 91 60 00 	lds	r24, 0x0060
+  a8:	8f 5f       	subi	r24, 0xFF	; 255
+  aa:	80 93 60 00 	sts	0x0060, r24
+   if(count==61)
+  ae:	80 91 60 00 	lds	r24, 0x0060
+  b2:	8d 33       	cpi	r24, 0x3D	; 61
+  b4:	29 f4       	brne	.+10     	; 0xc0 <__vector_11+0x28>
+   {
+      PORTC=~PORTC; //Invert the Value of PORTC
+  b6:	85 b3       	in	r24, 0x15	; 21
+  b8:	80 95       	com	r24
+  ba:	85 bb       	out	0x15, r24	; 21
+      count=0;
+  bc:	10 92 60 00 	sts	0x0060, r1
+   }
+}
+  c0:	8f 91       	pop	r24
+  c2:	0f 90       	pop	r0
+  c4:	0f be       	out	0x3f, r0	; 63
+  c6:	0f 90       	pop	r0
+  c8:	1f 90       	pop	r1
+  ca:	18 95       	reti
+
+000000cc <_exit>:
+  cc:	f8 94       	cli
+
+000000ce <__stop_program>:
+  ce:	ff cf       	rjmp	.-2      	; 0xce <__stop_program>
